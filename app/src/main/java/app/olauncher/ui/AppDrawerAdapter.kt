@@ -128,12 +128,11 @@ class AppDrawerAdapter(
                     .contains(charSearch, true))
     }
 
-    fun setAppList(context: Context, appsList: MutableList<AppModel>) {
-        val newList = appsList.map { if (it.appPackage.isNotEmpty()) it.copy(appIcon = context.packageManager.getApplicationIcon(it.appPackage)) else it }.toMutableList()
-        newList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle(), null))
-        this.appsList = newList
-        this.appFilteredList = newList
-        submitList(newList)
+    fun setAppList(appsList: MutableList<AppModel>) {
+        appsList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle(), null))
+        this.appsList = appsList
+        this.appFilteredList = appsList
+        submitList(appsList)
     }
 
     fun launchFirstInList() {
