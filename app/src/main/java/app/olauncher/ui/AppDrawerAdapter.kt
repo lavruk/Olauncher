@@ -128,12 +128,12 @@ class AppDrawerAdapter(
                     .contains(charSearch, true))
     }
 
-    fun setAppList(appsList: MutableList<AppModel>) {
-        // Add empty app for bottom padding in recyclerview
-        appsList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle()))
-        this.appsList = appsList
-        this.appFilteredList = appsList
-        submitList(appsList)
+    fun setAppList(context: Context, appsList: MutableList<AppModel>) {
+        val newList = appsList.map { if (it.appPackage.isNotEmpty()) it.copy(appIcon = context.packageManager.getApplicationIcon(it.appPackage)) else it }.toMutableList()
+        newList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle(), null))
+        this.appsList = newList
+        this.appFilteredList = newList
+        submitList(newList)
     }
 
     fun launchFirstInList() {
@@ -161,6 +161,7 @@ class AppDrawerAdapter(
                 appTitle.text = appModel.appLabel + if (appModel.isNew == true) " ✦" else ""
                 appTitle.gravity = appLabelGravity
                 otherProfileIndicator.isVisible = appModel.user != myUserHandle
+                appIcon.setImageDrawable(appModel.appIcon)
 
                 appTitle.setOnClickListener { clickListener(appModel) }
                 appTitle.setOnLongClickListener {

@@ -10,6 +10,7 @@ data class AppModel(
     val activityClassName: String?,
     val isNew: Boolean? = false,
     val user: UserHandle,
+    val appIcon: android.graphics.drawable.Drawable? = null,
 ) : Comparable<AppModel> {
     override fun compareTo(other: AppModel): Int = when {
         key != null && other.key != null -> key.compareTo(other.key)
