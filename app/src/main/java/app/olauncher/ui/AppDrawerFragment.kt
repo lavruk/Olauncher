@@ -27,6 +27,7 @@ import app.olauncher.helper.openUrl
 import app.olauncher.helper.showKeyboard
 import app.olauncher.helper.showToast
 import app.olauncher.helper.uninstall
+import app.olauncher.ui.LetterIndexAdapter
 
 
 class AppDrawerFragment : Fragment() {
@@ -184,6 +185,13 @@ class AppDrawerFragment : Fragment() {
         binding.recyclerView.itemAnimator = null
         if (requireContext().isEinkDisplay().not())
             binding.recyclerView.layoutAnimation =
+
+        val letterIndexAdapter = LetterIndexAdapter { letter ->
+            adapter.filter.filter(letter.toString())
+        }
+        binding.letterIndexRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.letterIndexRecyclerView.adapter = letterIndexAdapter
+        binding.letterIndexRecyclerView.itemAnimator = null
                 AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
     }
 
