@@ -188,12 +188,19 @@ class AppDrawerFragment : Fragment() {
                 AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
         }
 
-        val letterIndexAdapter = LetterIndexAdapter { letter ->
-            adapter.filter.filter(letter.toString())
-        }
+        val letterIndexAdapter = LetterIndexAdapter({ letter ->
+            scrollToLetter(letter)
+        })
         binding.letterIndexRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
         binding.letterIndexRecyclerView?.adapter = letterIndexAdapter
         binding.letterIndexRecyclerView?.itemAnimator = null
+    }
+
+    private fun scrollToLetter(letter: Char) {
+        val position = adapter.appsList.indexOfFirst { it.appLabel.startsWith(letter, ignoreCase = true) }
+        if (position != -1) {
+            linearLayoutManager.scrollToPositionWithOffset(position, 0)
+        }
     }
 
     private fun initObservers() {
