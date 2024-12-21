@@ -28,7 +28,15 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.databinding.FragmentHomeBinding
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.material.ripple.rememberRipple
+
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
@@ -44,9 +52,42 @@ import app.olauncher.helper.setPlainWallpaperByTheme
 import app.olauncher.helper.showToast
 import app.olauncher.listener.OnSwipeTouchListener
 import app.olauncher.listener.ViewSwipeTouchListener
+import android.content.res.Configuration
+import android.os.Build
+import android.view.Gravity
+import android.widget.TextClock
+import android.widget.TextView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import app.olauncher.MainViewModel
+import app.olauncher.R
+import app.olauncher.data.Constants
+import app.olauncher.data.Prefs
+import app.olauncher.helper.appUsagePermissionGranted
+import app.olauncher.helper.getColorFromAttr
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
+
 
 class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -54,32 +95,30 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private lateinit var viewModel: MainViewModel
     private lateinit var deviceManager: DevicePolicyManager
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                HomeScreenContent(prefs, viewModel, { homeAppClicked(it) }, { showAppList(it + Constants.FLAG_SET_HOME_APP_1 - 1, prefs.getAppName(it).isNotEmpty(), true) })
+            }
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onDestroyView() {
+        super.onDestroyView()
+    }
+}
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         prefs = Prefs(requireContext())
         viewModel = activity?.run {
             ViewModelProvider(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-
         deviceManager = context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-
-        initObservers()
-        setHomeAlignment(prefs.homeAlignment)
-        initSwipeTouchListener()
-        initClickListeners()
     }
 
     override fun onResume() {
         super.onResume()
-        populateHomeScreen(false)
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
@@ -588,7 +627,183 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         }
     }
 
-    override fun onDestroyView() {
+    import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+
+import android.widget.TextClock
+import android.widget.TextView
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.isVisible
+import app.olauncher.R
+import app.olauncher.data.Constants
+import app.olauncher.helper.getColorFromAttr
+import android.content.res.Configuration
+import android.os.Build
+import android.view.Gravity
+import app.olauncher.MainViewModel
+import app.olauncher.helper.appUsagePermissionGranted
+import java.text.SimpleDateFormat
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalConfiguration
+import java.util.*
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.res.stringResource
+
+@Composable
+fun HomeScreenContent(prefs: Prefs, viewModel: MainViewModel, onClick: (Int) -> Unit, onLongClick: (Int) -> Unit) {
+    val context = LocalContext.current
+    var dateText by remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = prefs.dateTimeVisibility) {
+        dateText = calculateDateText(context)
+    }
+
+    import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.ui.Alignment
+
+Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+        Spacer(modifier = Modifier.height(1.dp))
+
+        if (prefs.dateTimeVisibility != Constants.DateTime.OFF) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 56.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (Constants.DateTime.isTimeVisible(prefs.dateTimeVisibility)) {
+                    AndroidView(
+                        factory = { TextClock(it).apply { format12Hour = "h:mm" } },
+                        modifier = Modifier.wrapContentSize(),
+                        update = {
+                            it.setTextColor(context.getColorFromAttr(R.attr.primaryTextColor))
+                            it.textSize = context.resources.getDimension(R.dimen.time_size) / context.resources.displayMetrics.scaledDensity
+                            it.fontFamily = "sans-serif-light"
+                        }
+                    )
+                }
+
+                if (Constants.DateTime.isDateVisible(prefs.dateTimeVisibility)) {
+                    Text(
+                        text = dateText,
+                        style = TextStyle(
+                            color = Color(context.getColorFromAttr(R.attr.primaryTextColor)),
+                            fontSize = context.resources.getDimension(R.dimen.date_size) / context.resources.displayMetrics.scaledDensity.sp
+                        ),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(horizontal = 3.dp)
+                    )
+                }
+                        }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && context.appUsagePermissionGranted()) {
+                val screenTimeText = viewModel.screenTimeValue.observeAsState().value ?: ""
+
+                val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                val horizontalMargin = if (isLandscape) 64.dp else 10.dp
+                val marginTop = if (isLandscape) {
+                    if (prefs.dateTimeVisibility == Constants.DateTime.DATE_ONLY) 36.dp else 56.dp
+                } else {
+                    if (prefs.dateTimeVisibility == Constants.DateTime.DATE_ONLY) 45.dp else 72.dp
+                }
+
+                Text(
+                    text = screenTimeText,
+                    style = TextStyle(
+                        color = Color(context.getColorFromAttr(R.attr.primaryTextColor)),
+                        fontSize = context.resources.getDimension(R.dimen.date_size) / context.resources.displayMetrics.scaledDensity.sp
+                    ),
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(10.dp)
+                        .absoluteOffset(
+                            x = if (prefs.homeAlignment == Gravity.END) horizontalMargin else 0.dp,
+                            y = marginTop
+                        )
+                        .then(if(prefs.homeAlignment == Gravity.END) Modifier.align(Alignment.Start) else Modifier.align(Alignment.End))
+                )
+
+                        }
+            val homeAppsNum = prefs.homeAppsNum
+            if (homeAppsNum > 0) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 112.dp, bottom = 48.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    for (i in 1..homeAppsNum) {
+                        val appName = prefs.getAppName(i)
+                        val appPackage = prefs.getAppPackage(i)
+                        val appUser = prefs.getAppUser(i)
+
+                        if (appName.isNotEmpty() && appPackage.isNotEmpty()) {
+                            Text(
+                                text = appName,
+                                style = TextStyle(color = Color(context.getColorFromAttr(R.attr.primaryTextColor))),
+                                modifier = Modifier
+                                    .padding(vertical = context.resources.getDimension(R.dimen.home_app_padding_vertical).dp)
+                                    .clickable { onClick(i) }
+                                    .combinedClickable(
+                                        onClick = { onClick(i) },
+                                        onLongClick = { onLongClick(i) }
+                                    )
+
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+private fun calculateDateText(context: Context): String {
+    val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
+    var dateText = dateFormat.format(Date())
+
+    if (!prefs.showStatusBar) {
+//            val battery = (context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
+//                .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+//            if (battery > 0)
+//                dateText = context.getString(R.string.day_battery, dateText, battery)
+    }
+    return dateText.replace(".,", ",")
+}
+
+
+override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
