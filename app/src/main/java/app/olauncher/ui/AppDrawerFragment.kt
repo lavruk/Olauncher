@@ -183,16 +183,17 @@ class AppDrawerFragment : Fragment() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.addOnScrollListener(getRecyclerViewOnScrollListener())
         binding.recyclerView.itemAnimator = null
-        if (requireContext().isEinkDisplay().not())
+        if (requireContext().isEinkDisplay().not()) {
             binding.recyclerView.layoutAnimation =
+                AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
+        }
 
         val letterIndexAdapter = LetterIndexAdapter { letter ->
             adapter.filter.filter(letter.toString())
         }
-        binding.letterIndexRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.letterIndexRecyclerView.adapter = letterIndexAdapter
-        binding.letterIndexRecyclerView.itemAnimator = null
-                AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
+        binding.letterIndexRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+        binding.letterIndexRecyclerView?.adapter = letterIndexAdapter
+        binding.letterIndexRecyclerView?.itemAnimator = null
     }
 
     private fun initObservers() {
