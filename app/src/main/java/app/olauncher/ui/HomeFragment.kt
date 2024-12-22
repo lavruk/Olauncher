@@ -28,7 +28,7 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.databinding.FragmentHomeBinding
+
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
@@ -47,20 +47,133 @@ import app.olauncher.listener.ViewSwipeTouchListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 
-class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
+class HomeFragment : Fragment() {
 
     private lateinit var prefs: Prefs
     private lateinit var viewModel: MainViewModel
     private lateinit var deviceManager: DevicePolicyManager
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                HomeScreen(prefs = prefs, showStatusBar = prefs.showStatusBar,
+                    onClockClick = { openClockApp() },
+                    onDateClick = { openCalendarApp() },
+                    onClockLongClick = {
+                        showAppList(Constants.FLAG_SET_CLOCK_APP)
+                        prefs.clockAppPackage = ""
+                        prefs.clockAppClassName = ""
+                        prefs.clockAppUser = ""
+                    },
+                    onDateLongClick = {
+                        showAppList(Constants.FLAG_SET_CALENDAR_APP)
+                        prefs.calendarAppPackage = ""
+                        prefs.calendarAppClassName = ""
+                        prefs.calendarAppUser = ""
+                    }
+                )
+            }
+        }
     }
+
+import androidx.compose.material.TextClock
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import app.olauncher.data.Constants
+import app.olauncher.data.Prefs
+import java.text.SimpleDateFormat
+import java.util.*
+
+@Composable
+fun HomeScreen(prefs: Prefs, showStatusBar: Boolean, onClockClick: () -> Unit, onDateClick: () -> Unit, onClockLongClick: () -> Unit, onDateLongClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        DateTimeComposable(prefs, onClockClick, onDateClick, onClockLongClick, onDateLongClick, showStatusBar)
+    }
+}
+
+@Composable
+fun DateTimeComposable(prefs: Prefs, onClockClick: () -> Unit, onDateClick: () -> Unit, onClockLongClick: () -> Unit, onDateLongClick: () -> Unit, showStatusBar: Boolean) {
+    val context = LocalContext.current
+    val dateTimeVisibility by remember { mutableStateOf(prefs.dateTimeVisibility) }
+    val clockVisibility by remember { mutableStateOf(Constants.DateTime.isTimeVisible(dateTimeVisibility)) }
+    val dateVisibility by remember { mutableStateOf(Constants.DateTime.isDateVisible(dateTimeVisibility)) }
+
+
+    Column(
+        modifier = Modifier
+            .padding(top = 56.dp)
+            .wrapContentSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (clockVisibility) {
+            TextClock(
+                modifier = Modifier
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onClockClick() }
+                    .then(Modifier.combinedClickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onLongClick = onClockLongClick
+                    )),
+                format12Hour = "h:mm",
+                format24Hour = "H:mm",
+                timeZone = TimeZone.getDefault()
+            )
+        }
+
+        if (dateVisibility) {
+            val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
+            var dateText = dateFormat.format(Date())
+
+            if (!showStatusBar) {
+                val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                val battery = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                if (battery > 0)
+                    dateText = context.getString(R.string.day_battery, dateText, battery)
+            }
+
+            Text(
+                text = dateText.replace(".,", ","),
+                modifier = Modifier
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onDateClick() }
+                    .then(Modifier.combinedClickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onLongClick = onDateLongClick
+                    )),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,6 +193,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     override fun onResume() {
         super.onResume()
         populateHomeScreen(false)
+        
         viewModel.isOlauncherDefault()
         if (prefs.showStatusBar) showStatusBar()
         else hideStatusBar()
@@ -156,11 +270,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun initObservers() {
-        if (prefs.firstSettingsOpen) {
-            binding.firstRunTips.visibility = View.VISIBLE
-            binding.setDefaultLauncher.visibility = View.GONE
-        } else binding.firstRunTips.visibility = View.GONE
-
         viewModel.refreshHome.observe(viewLifecycleOwner) {
             populateHomeScreen(it)
         }
@@ -173,42 +282,24 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.homeBottomAlignment = false
                 setHomeAlignment()
             }
-            if (binding.firstRunTips.visibility == View.VISIBLE) return@Observer
-            if (it) binding.setDefaultLauncher.visibility = View.GONE
-            else binding.setDefaultLauncher.visibility = View.VISIBLE
         })
         viewModel.homeAppAlignment.observe(viewLifecycleOwner) {
             setHomeAlignment(it)
         }
         viewModel.toggleDateTime.observe(viewLifecycleOwner) {
-            populateDateTime()
+
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
-            it?.let { binding.tvScreenTime.text = it }
+
         }
     }
 
     private fun initSwipeTouchListener() {
-        val context = requireContext()
-        binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
-        binding.homeApp1.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp1))
-        binding.homeApp2.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp2))
-        binding.homeApp3.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp3))
-        binding.homeApp4.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp4))
-        binding.homeApp5.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp5))
-        binding.homeApp6.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp6))
-        binding.homeApp7.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp7))
-        binding.homeApp8.setOnTouchListener(getViewSwipeTouchListener(context, binding.homeApp8))
+    
     }
 
     private fun initClickListeners() {
-        binding.lock.setOnClickListener(this)
-        binding.clock.setOnClickListener(this)
-        binding.date.setOnClickListener(this)
-        binding.clock.setOnLongClickListener(this)
-        binding.date.setOnLongClickListener(this)
-        binding.setDefaultLauncher.setOnClickListener(this)
-        binding.tvScreenTime.setOnClickListener(this)
+    
     }
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
@@ -225,23 +316,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.homeApp8.gravity = horizontalGravity
     }
 
-    private fun populateDateTime() {
-        binding.dateTimeLayout.isVisible = prefs.dateTimeVisibility != Constants.DateTime.OFF
-        binding.clock.isVisible = Constants.DateTime.isTimeVisible(prefs.dateTimeVisibility)
-        binding.date.isVisible = Constants.DateTime.isDateVisible(prefs.dateTimeVisibility)
-
-//        var dateText = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date())
-        val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
-        var dateText = dateFormat.format(Date())
-
-        if (!prefs.showStatusBar) {
-            val battery = (requireContext().getSystemService(Context.BATTERY_SERVICE) as BatteryManager)
-                .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-            if (battery > 0)
-                dateText = getString(R.string.day_battery, dateText, battery)
-        }
-        binding.date.text = dateText.replace(".,", ",")
-    }
+    
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun populateScreenTime() {
@@ -434,17 +509,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun lockPhone() {
-        requireActivity().runOnUiThread {
-            try {
-                deviceManager.lockNow()
-            } catch (e: SecurityException) {
-                requireContext().showToast(getString(R.string.please_turn_on_double_tap_to_unlock), Toast.LENGTH_LONG)
-                findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
-            } catch (e: Exception) {
-                requireContext().showToast(getString(R.string.launcher_failed_to_lock_device), Toast.LENGTH_LONG)
-                prefs.lockModeOn = false
-            }
-        }
+    
     }
 
     private fun showStatusBar() {
