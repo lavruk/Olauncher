@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -280,68 +282,90 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val homeAppsNum = prefs.homeAppsNum
         if (homeAppsNum == 0) return
 
-        binding.homeApp1.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp1, prefs.appName1, prefs.appPackage1, prefs.appUser1)) {
+        if (!setHomeAppText(binding.homeApp1, 1)) {
             prefs.appName1 = ""
             prefs.appPackage1 = ""
+            prefs.appUser1 = ""
+            prefs.appActivityClassName1 = ""
         }
         if (homeAppsNum == 1) return
 
-        binding.homeApp2.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp2, prefs.appName2, prefs.appPackage2, prefs.appUser2)) {
+        if (!setHomeAppText(binding.homeApp2, 2)) {
             prefs.appName2 = ""
             prefs.appPackage2 = ""
+            prefs.appUser2 = ""
+            prefs.appActivityClassName2 = ""
         }
         if (homeAppsNum == 2) return
 
-        binding.homeApp3.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp3, prefs.appName3, prefs.appPackage3, prefs.appUser3)) {
+        if (!setHomeAppText(binding.homeApp3, 3)) {
             prefs.appName3 = ""
             prefs.appPackage3 = ""
+            prefs.appUser3 = ""
+            prefs.appActivityClassName3 = ""
         }
         if (homeAppsNum == 3) return
 
-        binding.homeApp4.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp4, prefs.appName4, prefs.appPackage4, prefs.appUser4)) {
+        if (!setHomeAppText(binding.homeApp4, 4)) {
             prefs.appName4 = ""
             prefs.appPackage4 = ""
+            prefs.appUser4 = ""
+            prefs.appActivityClassName4 = ""
         }
         if (homeAppsNum == 4) return
 
-        binding.homeApp5.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp5, prefs.appName5, prefs.appPackage5, prefs.appUser5)) {
+        if (!setHomeAppText(binding.homeApp5, 5)) {
             prefs.appName5 = ""
             prefs.appPackage5 = ""
+            prefs.appUser5 = ""
+            prefs.appActivityClassName5 = ""
         }
         if (homeAppsNum == 5) return
 
-        binding.homeApp6.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp6, prefs.appName6, prefs.appPackage6, prefs.appUser6)) {
+        if (!setHomeAppText(binding.homeApp6, 6)) {
             prefs.appName6 = ""
             prefs.appPackage6 = ""
+            prefs.appUser6 = ""
+            prefs.appActivityClassName6 = ""
         }
         if (homeAppsNum == 6) return
 
-        binding.homeApp7.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp7, prefs.appName7, prefs.appPackage7, prefs.appUser7)) {
+        if (!setHomeAppText(binding.homeApp7, 7)) {
             prefs.appName7 = ""
             prefs.appPackage7 = ""
+            prefs.appUser7 = ""
+            prefs.appActivityClassName7 = ""
         }
         if (homeAppsNum == 7) return
 
-        binding.homeApp8.visibility = View.VISIBLE
-        if (!setHomeAppText(binding.homeApp8, prefs.appName8, prefs.appPackage8, prefs.appUser8)) {
+        if (!setHomeAppText(binding.homeApp8, 8)) {
             prefs.appName8 = ""
             prefs.appPackage8 = ""
+            prefs.appUser8 = ""
+            prefs.appActivityClassName8 = ""
         }
     }
 
-    private fun setHomeAppText(textView: TextView, appName: String, packageName: String, userString: String): Boolean {
+    private fun setHomeAppText(linearLayout: LinearLayout, appLocation: Int): Boolean {
+        val packageName = prefs.getAppPackage(appLocation)
+        val userString = prefs.getAppUser(appLocation)
+
         if (isPackageInstalled(requireContext(), packageName, userString)) {
-            textView.text = appName
+            val appModel = AppModel(prefs.getAppName(appLocation), null, packageName, prefs.getAppActivityClassName(appLocation), false, getUserHandleFromString(requireContext(), userString))
+
+            val iconView = linearLayout.findViewById<ImageView>(resources.getIdentifier("homeApp${appLocation}Icon", "id", requireContext().packageName))
+            iconView.setImageDrawable(appModel.appIcon)
+
+            val textView = linearLayout.findViewById<TextView>(resources.getIdentifier("homeApp${appLocation}Text", "id", requireContext().packageName))
+            textView.text = appModel.appLabel
+
+            val workProfileView = linearLayout.findViewById<ImageView>(resources.getIdentifier("homeApp${appLocation}WorkProfile", "id", requireContext().packageName))
+            workProfileView.isVisible = appModel.user != android.os.Process.myUserHandle()
+
             return true
         }
-        textView.text = ""
+
+        linearLayout.visibility = View.GONE
         return false
     }
 
