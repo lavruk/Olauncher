@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import app.olauncher.MainViewModel
 import app.olauncher.R
+import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
 import app.olauncher.databinding.FragmentAppDrawerBinding
@@ -27,7 +28,6 @@ import app.olauncher.helper.openUrl
 import app.olauncher.helper.showKeyboard
 import app.olauncher.helper.showToast
 import app.olauncher.helper.uninstall
-import app.olauncher.ui.LetterIndexAdapter
 
 
 class AppDrawerFragment : Fragment() {
@@ -195,12 +195,11 @@ class AppDrawerFragment : Fragment() {
         binding.letterIndexRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
         binding.letterIndexRecyclerView?.adapter = letterIndexAdapter
         binding.letterIndexRecyclerView?.itemAnimator = null
-        updateLetterIndex()
-
-    private fun updateLetterIndex() {
-        val letters = adapter.appsList.map { it.appLabel.firstOrNull()?.toUpperCase() ?: '#' }.distinct().sorted()
-        letterIndexAdapter.setLetters(letters)
     }
+
+    private fun updateLetterIndex(appModels: List<AppModel>) {
+        val letters = appModels.map { it.appLabel.firstOrNull()?.uppercaseChar() ?: '#' }.distinct().sorted()
+        letterIndexAdapter.setLetters(letters)
     }
 
     private fun scrollToLetter(letter: Char) {
@@ -221,13 +220,14 @@ class AppDrawerFragment : Fragment() {
             viewModel.hiddenApps.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setAppList(it.toMutableList())
-                    updateLetterIndex()
+                    updateLetterIndex(it)
                 }
             }
         } else {
             viewModel.appList.observe(viewLifecycleOwner) {
                 it?.let { appModels ->
                     adapter.setAppList(appModels.toMutableList())
+                    updateLetterIndex(appModels)
                     adapter.filter.filter(binding.search.query)
                 }
             }
