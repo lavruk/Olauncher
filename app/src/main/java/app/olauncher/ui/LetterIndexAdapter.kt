@@ -6,9 +6,15 @@ import app.olauncher.R
 import androidx.recyclerview.widget.RecyclerView
 import app.olauncher.databinding.AdapterLetterIndexBinding
 
-class LetterIndexAdapter(private val onLetterScroll: (Char) -> Unit) : RecyclerView.Adapter<LetterIndexAdapter.ViewHolder>() {
+class LetterIndexAdapter(private val onLetterScroll: (Char) -> Unit, letters: List<Char> = ('A'..'Z').toList()) : RecyclerView.Adapter<LetterIndexAdapter.ViewHolder>() {
 
-    private val letters = ('A'..'Z').toList()
+    private var letters: List<Char> = letters
+
+    fun setLetters(newLetters: List<Char>) {
+        this.letters = newLetters
+        notifyDataSetChanged()
+    }
+
 
     class ViewHolder(val binding: AdapterLetterIndexBinding) : RecyclerView.ViewHolder(binding.root)
 

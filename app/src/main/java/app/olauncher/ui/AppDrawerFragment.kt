@@ -35,6 +35,7 @@ class AppDrawerFragment : Fragment() {
     private lateinit var prefs: Prefs
     private lateinit var adapter: AppDrawerAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var letterIndexAdapter: LetterIndexAdapter
 
     private var flag = Constants.FLAG_LAUNCH_APP
     private var canRename = false
@@ -188,12 +189,18 @@ class AppDrawerFragment : Fragment() {
                 AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.layout_anim_from_bottom)
         }
 
-        val letterIndexAdapter = LetterIndexAdapter({ letter ->
+        letterIndexAdapter = LetterIndexAdapter({ letter ->
             scrollToLetter(letter)
         })
         binding.letterIndexRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
         binding.letterIndexRecyclerView?.adapter = letterIndexAdapter
         binding.letterIndexRecyclerView?.itemAnimator = null
+        updateLetterIndex()
+
+    private fun updateLetterIndex() {
+        val letters = adapter.appsList.map { it.appLabel.firstOrNull()?.toUpperCase() ?: '#' }.distinct().sorted()
+        letterIndexAdapter.setLetters(letters)
+    }
     }
 
     private fun scrollToLetter(letter: Char) {
@@ -214,6 +221,7 @@ class AppDrawerFragment : Fragment() {
             viewModel.hiddenApps.observe(viewLifecycleOwner) {
                 it?.let {
                     adapter.setAppList(it.toMutableList())
+                    updateLetterIndex()
                 }
             }
         } else {
