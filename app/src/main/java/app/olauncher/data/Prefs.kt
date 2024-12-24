@@ -1,11 +1,70 @@
 package app.olauncher.data
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.Serializer
+import androidx.datastore.dataStore
+import app.olauncher.data.UserPrefs
+import java.io.InputStream
+import java.io.OutputStream
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+object UserPrefsSerializer : Serializer<UserPrefs> {
+    override val defaultValue: UserPrefs = UserPrefs.getDefaultInstance()
+
+    override suspend fun readFrom(input: InputStream): UserPrefs {
+        try {
+            return UserPrefs.parseFrom(input)
+        
+    val hasMigratedFlow: Flow<Boolean> = context.userPrefsDataStore.data.map { preferences ->
+        preferences.hasMigrated
+    }
+
+    suspend fun updateHasMigrated(value: Boolean) {
+        context.userPrefsDataStore.updateData { preferences ->
+            preferences.toBuilder().setHasMigrated(value).build()
+        }
+    }
+
+
+    suspend fun migrateFromSharedPrefs() {
+        if (!prefs.getBoolean(HAS_MIGRATED, false)) {
+            // Migrate data here, e.g.,
+            // context.userPrefsDataStore.updateData { preferences ->
+            //     preferences.toBuilder().setFirstOpen(prefs.getBoolean(FIRST_OPEN, true)).build()
+            // }
+            // ... migrate other preferences ...
+
+            updateHasMigrated(true)
+
+            // Consider clearing SharedPreferences after migration
+            prefs.edit().clear().apply()
+        }
+    }
+
+    private val HAS_MIGRATED = "HAS_MIGRATED"
+} catch (exception: Exception) {
+            throw exception
+        }
+    }
+
+    override suspend fun writeTo(t: UserPrefs, output: OutputStream) = t.writeTo(output)
+}
+
+val Context.userPrefsDataStore: DataStore<UserPrefs> by dataStore(
+    fileName = "user_prefs.pb",
+    serializer = UserPrefsSerializer
+)
+
+import android.content.Context
 import android.content.SharedPreferences
 import android.view.Gravity
 import androidx.appcompat.app.AppCompatDelegate
 
-class Prefs(context: Context) {
+import kotlinx.coroutines.CoroutineScope
+
+class Prefs(context: Context, private val scope: CoroutineScope) {
     private val PREFS_FILENAME = "app.olauncher"
 
     private val FIRST_OPEN = "FIRST_OPEN"
@@ -88,21 +147,47 @@ class Prefs(context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0);
 
-    var firstOpen: Boolean
-        get() = prefs.getBoolean(FIRST_OPEN, true)
-        set(value) = prefs.edit().putBoolean(FIRST_OPEN, value).apply()
+    val firstOpenFlow: Flow<Boolean> = context.userPrefsDataStore.data.map { preferences ->
+        preferences.firstOpen
+    }
 
-    var firstOpenTime: Long
-        get() = prefs.getLong(FIRST_OPEN_TIME, 0L)
-        set(value) = prefs.edit().putLong(FIRST_OPEN_TIME, value).apply()
+    suspend fun updateFirstOpen(value: Boolean) {
+        context.userPrefsDataStore.updateData { preferences ->
+            preferences.toBuilder().setFirstOpen(value).build()
+        }
+    }
 
-    var firstSettingsOpen: Boolean
-        get() = prefs.getBoolean(FIRST_SETTINGS_OPEN, true)
-        set(value) = prefs.edit().putBoolean(FIRST_SETTINGS_OPEN, value).apply()
 
-    var firstHide: Boolean
-        get() = prefs.getBoolean(FIRST_HIDE, true)
-        set(value) = prefs.edit().putBoolean(FIRST_HIDE, value).apply()
+    val firstOpenTimeFlow: Flow<Long> = context.userPrefsDataStore.data.map { preferences ->
+        preferences.firstOpenTime
+    }
+
+    suspend fun updateFirstOpenTime(value: Long) {
+        context.userPrefsDataStore.updateData { preferences ->
+            preferences.toBuilder().setFirstOpenTime(value).build()
+        }
+    }
+
+    val firstSettingsOpenFlow: Flow<Boolean> = context.userPrefsDataStore.data.map { preferences ->
+        preferences.firstSettingsOpen
+    }
+
+    suspend fun updateFirstSettingsOpen(value: Boolean) {
+        context.userPrefsDataStore.updateData { preferences ->
+            preferences.toBuilder().setFirstSettingsOpen(value).build()
+        }
+    }
+
+
+    val firstHideFlow: Flow<Boolean> = context.userPrefsDataStore.data.map { preferences ->
+        preferences.firstHide
+    }
+
+    suspend fun updateFirstHide(value: Boolean) {
+        context.userPrefsDataStore.updateData { preferences ->
+            preferences.toBuilder().setFirstHide(value).build()
+        }
+    }
 
     var userState: String
         get() = prefs.getString(USER_STATE, Constants.UserState.START).toString()

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option java_package = "app.olauncher.data";
+option java_multiple_files = true;
+
+message UserPrefs {
+  bool first_open = 1;
+  int64 first_open_time = 2;
+  bool first_settings_open = 3;
+  bool first_hide = 4;
+  string user_state = 5;
+  bool lock_mode_on = 6;
+  int32 home_apps_num = 7;
+  bool auto_show_keyboard = 8;
+  bool keyboard_message_shown = 9;
+  bool daily_wallpaper = 10;
+  string daily_wallpaper_url = 11;
+  int32 wallpaper_updated_day = 12;
+  int32 home_alignment = 13;
+  bool home_bottom_alignment = 14;
+  int32 app_label_alignment = 15;
+  bool show_status_bar = 16;
+  int32 date_time_visibility = 17;
+  bool swipe_left_enabled = 18;
+  bool swipe_right_enabled = 19;
+  repeated string hidden_apps = 20;
+  bool hidden_apps_updated = 21;
+  int32 show_hint_counter = 22;
+  int32 app_theme = 23;
+  bool about_clicked = 24;
+  bool rate_clicked = 25;
+  int64 share_shown_time = 26;
+  int32 swipe_down_action = 27;
+  float text_size_scale = 28;
+  bool pro_message_shown = 29;
+
+  repeated string app_name = 30;
+  repeated string app_package = 31;
+  repeated string app_activity_class_name = 32;
+  repeated string app_user = 33;
+
+  string app_name_swipe_left = 34;
+  string app_name_swipe_right = 35;
+  string app_package_swipe_left = 36;
+  string app_package_swipe_right = 37;
+  string app_activity_class_name_swipe_left = 38;
+  string app_activity_class_name_swipe_right = 39;
+  string app_user_swipe_left = 40;
+  string app_user_swipe_right = 41;
+  string clock_app_package = 42;
+  string clock_app_user = 43;
+  string clock_app_class_name = 44;
+  string calendar_app_package = 45;
+  string calendar_app_user = 46;
+  string calendar_app_class_name = 47;
+
+
+  bool has_migrated = 48;
+}
