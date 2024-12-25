@@ -11,4 +11,4 @@
     <attr name="primaryShadeColor" format="color" />
     <attr name="dialogShadeColor" format="color" />
     <attr name="primaryShadeDarkColor" format="color" />
-<declare-styleable name="HomeAppView"></declare-styleable></resources>
+</resources>

@@ -38,38 +38,10 @@ class Prefs(context: Context) {
     private val TEXT_SIZE_SCALE = "TEXT_SIZE_SCALE"
     private val PRO_MESSAGE_SHOWN = "PRO_MESSAGE_SHOWN"
 
-    private val APP_NAME_1 = "APP_NAME_1"
-    private val APP_NAME_2 = "APP_NAME_2"
-    private val APP_NAME_3 = "APP_NAME_3"
-    private val APP_NAME_4 = "APP_NAME_4"
-    private val APP_NAME_5 = "APP_NAME_5"
-    private val APP_NAME_6 = "APP_NAME_6"
-    private val APP_NAME_7 = "APP_NAME_7"
-    private val APP_NAME_8 = "APP_NAME_8"
-    private val APP_PACKAGE_1 = "APP_PACKAGE_1"
-    private val APP_PACKAGE_2 = "APP_PACKAGE_2"
-    private val APP_PACKAGE_3 = "APP_PACKAGE_3"
-    private val APP_PACKAGE_4 = "APP_PACKAGE_4"
-    private val APP_PACKAGE_5 = "APP_PACKAGE_5"
-    private val APP_PACKAGE_6 = "APP_PACKAGE_6"
-    private val APP_PACKAGE_7 = "APP_PACKAGE_7"
-    private val APP_PACKAGE_8 = "APP_PACKAGE_8"
-    private val APP_ACTIVITY_CLASS_NAME_1 = "APP_ACTIVITY_CLASS_NAME_1"
-    private val APP_ACTIVITY_CLASS_NAME_2 = "APP_ACTIVITY_CLASS_NAME_2"
-    private val APP_ACTIVITY_CLASS_NAME_3 = "APP_ACTIVITY_CLASS_NAME_3"
-    private val APP_ACTIVITY_CLASS_NAME_4 = "APP_ACTIVITY_CLASS_NAME_4"
-    private val APP_ACTIVITY_CLASS_NAME_5 = "APP_ACTIVITY_CLASS_NAME_5"
-    private val APP_ACTIVITY_CLASS_NAME_6 = "APP_ACTIVITY_CLASS_NAME_6"
-    private val APP_ACTIVITY_CLASS_NAME_7 = "APP_ACTIVITY_CLASS_NAME_7"
-    private val APP_ACTIVITY_CLASS_NAME_8 = "APP_ACTIVITY_CLASS_NAME_8"
-    private val APP_USER_1 = "APP_USER_1"
-    private val APP_USER_2 = "APP_USER_2"
-    private val APP_USER_3 = "APP_USER_3"
-    private val APP_USER_4 = "APP_USER_4"
-    private val APP_USER_5 = "APP_USER_5"
-    private val APP_USER_6 = "APP_USER_6"
-    private val APP_USER_7 = "APP_USER_7"
-    private val APP_USER_8 = "APP_USER_8"
+    private val APP_NAME = "APP_NAME_1"
+    private val APP_PACKAGE = "APP_PACKAGE_1"
+    private val APP_ACTIVITY_CLASS_NAME = "APP_ACTIVITY_CLASS_NAME_1"
+    private val APP_USER = "APP_USER_1"
 
     private val APP_NAME_SWIPE_LEFT = "APP_NAME_SWIPE_LEFT"
     private val APP_NAME_SWIPE_RIGHT = "APP_NAME_SWIPE_RIGHT"
@@ -200,134 +172,6 @@ class Prefs(context: Context) {
         get() = prefs.getInt(SWIPE_DOWN_ACTION, Constants.SwipeDownAction.NOTIFICATIONS)
         set(value) = prefs.edit().putInt(SWIPE_DOWN_ACTION, value).apply()
 
-    var appName1: String
-        get() = prefs.getString(APP_NAME_1, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_1, value).apply()
-
-    var appName2: String
-        get() = prefs.getString(APP_NAME_2, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_2, value).apply()
-
-    var appName3: String
-        get() = prefs.getString(APP_NAME_3, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_3, value).apply()
-
-    var appName4: String
-        get() = prefs.getString(APP_NAME_4, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_4, value).apply()
-
-    var appName5: String
-        get() = prefs.getString(APP_NAME_5, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_5, value).apply()
-
-    var appName6: String
-        get() = prefs.getString(APP_NAME_6, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_6, value).apply()
-
-    var appName7: String
-        get() = prefs.getString(APP_NAME_7, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_7, value).apply()
-
-    var appName8: String
-        get() = prefs.getString(APP_NAME_8, "").toString()
-        set(value) = prefs.edit().putString(APP_NAME_8, value).apply()
-
-    var appPackage1: String
-        get() = prefs.getString(APP_PACKAGE_1, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_1, value).apply()
-
-    var appPackage2: String
-        get() = prefs.getString(APP_PACKAGE_2, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_2, value).apply()
-
-    var appPackage3: String
-        get() = prefs.getString(APP_PACKAGE_3, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_3, value).apply()
-
-    var appPackage4: String
-        get() = prefs.getString(APP_PACKAGE_4, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_4, value).apply()
-
-    var appPackage5: String
-        get() = prefs.getString(APP_PACKAGE_5, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_5, value).apply()
-
-    var appPackage6: String
-        get() = prefs.getString(APP_PACKAGE_6, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_6, value).apply()
-
-    var appPackage7: String
-        get() = prefs.getString(APP_PACKAGE_7, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_7, value).apply()
-
-    var appPackage8: String
-        get() = prefs.getString(APP_PACKAGE_8, "").toString()
-        set(value) = prefs.edit().putString(APP_PACKAGE_8, value).apply()
-
-    var appActivityClassName1: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_1, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_1, value).apply()
-
-    var appActivityClassName2: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_2, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_2, value).apply()
-
-    var appActivityClassName3: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_3, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_3, value).apply()
-
-    var appActivityClassName4: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_4, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_4, value).apply()
-
-    var appActivityClassName5: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_5, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_5, value).apply()
-
-    var appActivityClassName6: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_6, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_6, value).apply()
-
-    var appActivityClassName7: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_7, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_7, value).apply()
-
-    var appActivityClassName8: String?
-        get() = prefs.getString(APP_ACTIVITY_CLASS_NAME_8, "").toString()
-        set(value) = prefs.edit().putString(APP_ACTIVITY_CLASS_NAME_8, value).apply()
-
-    var appUser1: String
-        get() = prefs.getString(APP_USER_1, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_1, value).apply()
-
-    var appUser2: String
-        get() = prefs.getString(APP_USER_2, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_2, value).apply()
-
-    var appUser3: String
-        get() = prefs.getString(APP_USER_3, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_3, value).apply()
-
-    var appUser4: String
-        get() = prefs.getString(APP_USER_4, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_4, value).apply()
-
-    var appUser5: String
-        get() = prefs.getString(APP_USER_5, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_5, value).apply()
-
-    var appUser6: String
-        get() = prefs.getString(APP_USER_6, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_6, value).apply()
-
-    var appUser7: String
-        get() = prefs.getString(APP_USER_7, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_7, value).apply()
-
-    var appUser8: String
-        get() = prefs.getString(APP_USER_8, "").toString()
-        set(value) = prefs.edit().putString(APP_USER_8, value).apply()
-
     var appNameSwipeLeft: String
         get() = prefs.getString(APP_NAME_SWIPE_LEFT, "Camera").toString()
         set(value) = prefs.edit().putString(APP_NAME_SWIPE_LEFT, value).apply()
@@ -384,63 +228,31 @@ class Prefs(context: Context) {
         get() = prefs.getString(CALENDAR_APP_CLASS_NAME, "").toString()
         set(value) = prefs.edit().putString(CALENDAR_APP_CLASS_NAME, value).apply()
 
-    fun getAppName(location: Int): String {
-        return when (location) {
-            1 -> prefs.getString(APP_NAME_1, "").toString()
-            2 -> prefs.getString(APP_NAME_2, "").toString()
-            3 -> prefs.getString(APP_NAME_3, "").toString()
-            4 -> prefs.getString(APP_NAME_4, "").toString()
-            5 -> prefs.getString(APP_NAME_5, "").toString()
-            6 -> prefs.getString(APP_NAME_6, "").toString()
-            7 -> prefs.getString(APP_NAME_7, "").toString()
-            8 -> prefs.getString(APP_NAME_8, "").toString()
-            else -> ""
-        }
-    }
+    fun getAppName(location: Int): String = prefs.getString("{$APP_NAME}_$location", "").toString()
 
-    fun getAppPackage(location: Int): String {
-        return when (location) {
-            1 -> prefs.getString(APP_PACKAGE_1, "").toString()
-            2 -> prefs.getString(APP_PACKAGE_2, "").toString()
-            3 -> prefs.getString(APP_PACKAGE_3, "").toString()
-            4 -> prefs.getString(APP_PACKAGE_4, "").toString()
-            5 -> prefs.getString(APP_PACKAGE_5, "").toString()
-            6 -> prefs.getString(APP_PACKAGE_6, "").toString()
-            7 -> prefs.getString(APP_PACKAGE_7, "").toString()
-            8 -> prefs.getString(APP_PACKAGE_8, "").toString()
-            else -> ""
-        }
-    }
+    fun getAppPackage(location: Int): String = prefs.getString("${APP_PACKAGE}_$location", "").toString()
 
-    fun getAppActivityClassName(location: Int): String {
-        return when (location) {
-            1 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_1, "").toString()
-            2 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_2, "").toString()
-            3 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_3, "").toString()
-            4 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_4, "").toString()
-            5 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_5, "").toString()
-            6 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_6, "").toString()
-            7 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_7, "").toString()
-            8 -> prefs.getString(APP_ACTIVITY_CLASS_NAME_8, "").toString()
-            else -> ""
-        }
-    }
+    fun getAppActivityClassName(location: Int): String = prefs.getString("${APP_ACTIVITY_CLASS_NAME}_$location", "").toString()
 
-    fun getAppUser(location: Int): String {
-        return when (location) {
-            1 -> prefs.getString(APP_USER_1, "").toString()
-            2 -> prefs.getString(APP_USER_2, "").toString()
-            3 -> prefs.getString(APP_USER_3, "").toString()
-            4 -> prefs.getString(APP_USER_4, "").toString()
-            5 -> prefs.getString(APP_USER_5, "").toString()
-            6 -> prefs.getString(APP_USER_6, "").toString()
-            7 -> prefs.getString(APP_USER_7, "").toString()
-            8 -> prefs.getString(APP_USER_8, "").toString()
-            else -> ""
-        }
-    }
+    fun getAppUser(location: Int): String = prefs.getString("${APP_USER}_$location", "").toString()
 
     fun getAppRenameLabel(appPackage: String): String = prefs.getString(appPackage, "").toString()
 
     fun setAppRenameLabel(appPackage: String, renameLabel: String) = prefs.edit().putString(appPackage, renameLabel).apply()
+
+    fun setAppName(location: Int, name: String) {
+        prefs.edit().putString("{$APP_NAME}_$location", name).apply()
+    }
+
+    fun setAppPackage(location: Int, packageName: String) {
+        prefs.edit().putString("${APP_PACKAGE}_$location", packageName).apply()
+    }
+
+    fun setAppUser(location: Int, user: String) {
+        prefs.edit().putString("${APP_USER}_$location", user).apply()
+    }
+
+    fun setAppActivityClassName(location: Int, activityClassName: String?) {
+        prefs.edit().putString("${APP_ACTIVITY_CLASS_NAME}_$location", activityClassName).apply()
+    }
 }

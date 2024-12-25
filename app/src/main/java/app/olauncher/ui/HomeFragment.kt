@@ -64,15 +64,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         return if (useCompose) {
             ComposeView(requireContext()).apply {
                 setContent {
-                    val appNames = listOf(
-                        prefs.appName1,
-                        prefs.appName2,
-                        prefs.appName3,
-                        prefs.appName4,
-                        prefs.appName5,
-                        prefs.appName6,
-                        prefs.appName7,
-                        prefs.appName8
+                    val appNames = listOf<String>(
+                        // TODO - add app names
                     )
                     HomeView(
                         viewModel,
@@ -127,7 +120,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 if (view is HomeAppView) {
                     val appLocation = view.textView.tag.toString().toInt()
                     homeAppClicked(appLocation)
-
                 }
             }
         }
@@ -233,7 +225,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         binding.date.setOnLongClickListener(this)
         binding.setDefaultLauncher.setOnClickListener(this)
         binding.tvScreenTime.setOnClickListener(this)
-
     }
 
     private val homeAppViews = mutableListOf<HomeAppView>()
@@ -242,9 +233,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
         binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
         binding.dateTimeLayout.gravity = horizontalGravity
-            }
-
-    private fun populateDateTime() {
+    }
 
     private fun populateDateTime() {
         binding.dateTimeLayout.isVisible = prefs.dateTimeVisibility != Constants.DateTime.OFF
@@ -309,8 +298,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             homeAppViews.add(homeAppView)
             binding.homeAppsLayout.addView(homeAppView)
 
-            homeAppView.onClickListener = this
-            homeAppView.onLongClickListener = this
+            homeAppView.setOnClickListener(this)
+            homeAppView.setOnLongClickListener(this)
             homeAppView.textView.tag = i + 1
 
 
@@ -347,9 +336,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             prefs.getAppUser(location)
         )
     }
-
-    private fun getViewSwipeTouchListener(context: Context, view: View): View.OnTouchListener {
-        return object : ViewSwipeTouchListener(context, view) {
 
     private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String) {
         viewModel.selectedApp(
