@@ -59,9 +59,37 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    private var useCompose = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
+        return if (useCompose) {
+            ComposeView(requireContext()).apply {
+                setContent {
+                    val appNames = listOf(
+                        prefs.appName1,
+                        prefs.appName2,
+                        prefs.appName3,
+                        prefs.appName4,
+                        prefs.appName5,
+                        prefs.appName6,
+                        prefs.appName7,
+                        prefs.appName8
+                    )
+                    HomeView(
+                        viewModel,
+                        appNames,
+                        { index -> homeAppClicked(index + 1) },
+                        { index -> homeAppLongClicked(index + 1) })
+                }
+            }
+        } else {
+            _binding = FragmentHomeBinding.inflate(inflater, container, false)
+            binding.root
+        }
+    }
+
+    private fun homeAppLongClicked(i: Int) {
+        TODO("Not yet implemented")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,12 +106,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         initSwipeTouchListener()
         initClickListeners()
 
-//        return ComposeView(requireContext()).apply {
-//            setContent {
-//                val appNames = listOf(prefs.appName1, prefs.appName2, prefs.appName3, prefs.appName4, prefs.appName5, prefs.appName6, prefs.appName7, prefs.appName8)
-//                HomeView(viewModel, appNames, { index -> homeAppClicked(index + 1) }, { index -> homeAppLongClicked(index) })
-//            }
-//        }
     }
 
     override fun onResume() {
