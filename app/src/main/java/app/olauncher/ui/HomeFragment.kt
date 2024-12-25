@@ -28,7 +28,7 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.databinding.FragmentHomeBinding
+
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
@@ -47,6 +47,8 @@ import app.olauncher.listener.ViewSwipeTouchListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.platform.ComposeView
+import app.olauncher.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -75,6 +77,13 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         setHomeAlignment(prefs.homeAlignment)
         initSwipeTouchListener()
         initClickListeners()
+
+//        return ComposeView(requireContext()).apply {
+//            setContent {
+//                val appNames = listOf(prefs.appName1, prefs.appName2, prefs.appName3, prefs.appName4, prefs.appName5, prefs.appName6, prefs.appName7, prefs.appName8)
+//                HomeView(viewModel, appNames, { index -> homeAppClicked(index + 1) }, { index -> homeAppLongClicked(index) })
+//            }
+//        }
     }
 
     override fun onResume() {
@@ -159,7 +168,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (prefs.firstSettingsOpen) {
             binding.firstRunTips.visibility = View.VISIBLE
             binding.setDefaultLauncher.visibility = View.GONE
-        } else binding.firstRunTips.visibility = View.GONE
+        } else {
+            binding.firstRunTips.visibility = View.GONE
+        }
 
         viewModel.refreshHome.observe(viewLifecycleOwner) {
             populateHomeScreen(it)
