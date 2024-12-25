@@ -28,7 +28,7 @@ import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.databinding.FragmentHomeBinding
+
 import app.olauncher.helper.appUsagePermissionGranted
 import app.olauncher.helper.dpToPx
 import app.olauncher.helper.expandNotificationDrawer
@@ -54,16 +54,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private lateinit var viewModel: MainViewModel
     private lateinit var deviceManager: DevicePolicyManager
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
+    
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    import androidx.compose.ui.platform.ComposeView
+import app.olauncher.ui.HomeView
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         prefs = Prefs(requireContext())
         viewModel = activity?.run {
             ViewModelProvider(this)[MainViewModel::class.java]
@@ -71,10 +67,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
         deviceManager = context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
 
-        initObservers()
-        setHomeAlignment(prefs.homeAlignment)
-        initSwipeTouchListener()
-        initClickListeners()
+        return ComposeView(requireContext()).apply {
+            setContent {
+                val appNames = listOf(prefs.appName1, prefs.appName2, prefs.appName3, prefs.appName4, prefs.appName5, prefs.appName6, prefs.appName7, prefs.appName8)
+                HomeView(viewModel, appNames, { index -> homeAppClicked(index + 1) }, { index -> homeAppLongClicked(index) })
+            }
+        }
     }
 
     override fun onResume() {
@@ -506,6 +504,20 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private fun textOnClick(view: View) = onClick(view)
 
     private fun textOnLongClick(view: View) = onLongClick(view)
+
+    private fun homeAppLongClicked(index: Int) {
+        when (index + 1) {
+            1 -> showAppList(Constants.FLAG_SET_HOME_APP_1, prefs.appName1.isNotEmpty(), true)
+            2 -> showAppList(Constants.FLAG_SET_HOME_APP_2, prefs.appName2.isNotEmpty(), true)
+            3 -> showAppList(Constants.FLAG_SET_HOME_APP_3, prefs.appName3.isNotEmpty(), true)
+            4 -> showAppList(Constants.FLAG_SET_HOME_APP_4, prefs.appName4.isNotEmpty(), true)
+            5 -> showAppList(Constants.FLAG_SET_HOME_APP_5, prefs.appName5.isNotEmpty(), true)
+            6 -> showAppList(Constants.FLAG_SET_HOME_APP_6, prefs.appName6.isNotEmpty(), true)
+            7 -> showAppList(Constants.FLAG_SET_HOME_APP_7, prefs.appName7.isNotEmpty(), true)
+            8 -> showAppList(Constants.FLAG_SET_HOME_APP_8, prefs.appName8.isNotEmpty(), true)
+            else -> {}
+        }
+    }
 
     private fun getSwipeGestureListener(context: Context): View.OnTouchListener {
         return object : OnSwipeTouchListener(context) {
