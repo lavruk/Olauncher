@@ -1,5 +1,6 @@
 package app.olauncher.data
 
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import java.text.CollationKey
 
@@ -10,7 +11,7 @@ data class AppModel(
     val activityClassName: String?,
     val isNew: Boolean? = false,
     val user: UserHandle,
-    val appIcon: android.graphics.drawable.Drawable? = null,
+    val appIcon: Drawable,
 ) : Comparable<AppModel> {
     override fun compareTo(other: AppModel): Int = when {
         key != null && other.key != null -> key.compareTo(other.key)

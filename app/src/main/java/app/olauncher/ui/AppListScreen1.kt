@@ -291,13 +291,15 @@ fun getInstalledApps(packageManager: PackageManager): List<AppInfo> {
 }
 
 @Composable
-fun Icon(drawable: Drawable, contentDescription: String?, modifier: Modifier = Modifier, tint: Color) {
-    val bitmap = remember(drawable) { drawable.toBitmap() }
-    Image(
-        bitmap = bitmap,
-        contentDescription = contentDescription,
-        modifier = modifier,
-    )
+fun Icon(drawable: Drawable?, contentDescription: String?, modifier: Modifier = Modifier, tint: Color) {
+    if (drawable!=null) {
+        val bitmap = remember(drawable) { drawable.toBitmap() }
+        Image(
+            bitmap = bitmap,
+            contentDescription = contentDescription,
+            modifier = modifier,
+        )
+    }
 }
 
 fun Drawable.toBitmap(): ImageBitmap {

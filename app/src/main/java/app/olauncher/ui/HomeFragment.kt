@@ -344,17 +344,17 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String) {
-        viewModel.selectedApp(
-            AppModel(
-                appName,
-                null,
-                packageName,
-                activityClassName,
-                false,
-                getUserHandleFromString(requireContext(), userString)
-            ),
-            Constants.FLAG_LAUNCH_APP
-        )
+//        viewModel.selectedApp(
+//            AppModel(
+//                appName,
+//                null,
+//                packageName,
+//                activityClassName,
+//                false,
+//                getUserHandleFromString(requireContext(), userString)
+//            ),
+//            Constants.FLAG_LAUNCH_APP
+//        )
     }
 
     private fun showAppList(flag: Int, rename: Boolean = false, includeHiddenApps: Boolean = false) {

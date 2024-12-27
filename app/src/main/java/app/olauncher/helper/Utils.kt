@@ -158,6 +158,35 @@ suspend fun getHomeAppsList(
     }
 }
 
+suspend fun getAppsList(
+    context: Context,
+): List<AppModel> {
+    return withContext(Dispatchers.IO) {
+
+        try {
+            val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
+            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val collator = Collator.getInstance()
+
+            userManager.userProfiles.flatMap { profile ->
+                launcherApps.getActivityList(null, profile).map { app ->
+                    AppModel(
+                        appLabel = app.label.toString(),
+                        key = collator.getCollationKey(app.label.toString()),
+                        appPackage = app.applicationInfo.packageName,
+                        activityClassName = app.componentName.className,
+                        isNew = (System.currentTimeMillis() - app.firstInstallTime) < Constants.ONE_HOUR_IN_MILLIS,
+                        user = profile,
+                        appIcon = app.getIcon(0),
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+}
+
 // This is to ensure backward compatibility with older app versions
 // which did not support multiple user profiles
 private fun upgradeHiddenApps(prefs: Prefs) {

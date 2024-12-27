@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.get
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import app.olauncher.data.Constants
@@ -38,6 +39,7 @@ import app.olauncher.helper.shareApp
 import app.olauncher.helper.showLauncherSelector
 import app.olauncher.helper.showToast
 import app.olauncher.ui.AppListScreen1
+import app.olauncher.ui.AppListScreen2
 import app.olauncher.ui.HomeView
 import app.olauncher.ui.theme.JetLaggedTheme
 import java.util.Calendar
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             val windowSizeClass = calculateWindowSizeClass(this)
             JetLaggedTheme {
 //                HomeView(windowSizeClass, viewModel, {}, {})
-                AppListScreen1()
+                AppListScreen2(ViewModelProvider(this).get())
             }
         }
 

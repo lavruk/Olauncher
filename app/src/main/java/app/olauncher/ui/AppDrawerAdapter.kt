@@ -134,7 +134,7 @@ class AppDrawerAdapter(
     }
 
     fun setAppList(appsList: MutableList<AppModel>) {
-        appsList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle(), null))
+//        appsList.add(AppModel("", null, "", "", false, android.os.Process.myUserHandle(), null))
         this.appsList = appsList
         this.appFilteredList = appsList
         submitList(appsList)
