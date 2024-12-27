@@ -39,6 +39,7 @@ import app.olauncher.BuildConfig
 import app.olauncher.R
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
+import app.olauncher.data.HomeAppModel
 import app.olauncher.data.Prefs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -116,6 +117,44 @@ suspend fun getAppsList(
             e.printStackTrace()
         }
         appList
+    }
+}
+
+suspend fun getHomeAppsList(
+    apps: List<HomeAppModel>,
+    context: Context,
+    prefs: Prefs,
+): List<AppModel> {
+    return withContext(Dispatchers.IO) {
+        try {
+            val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
+            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+            val collator = Collator.getInstance()
+
+            userManager.userProfiles.flatMap { profile ->
+                launcherApps.getActivityList(null, profile)
+                    .filter {
+                        // if the current app is not OLauncher
+                        it.applicationInfo.packageName != BuildConfig.APPLICATION_ID &&
+                                apps.any { app -> app.appPackage == it.applicationInfo.packageName && app.user == profile.toString() && app.activityClassName == it.componentName.className  }
+                    }
+                    .map { app ->
+                        val appLabelShown = prefs.getAppRenameLabel(app.applicationInfo.packageName).ifBlank { app.label.toString() }
+                        AppModel(
+                            appLabel = appLabelShown,
+                            key = collator.getCollationKey(app.label.toString()),
+                            appPackage = app.applicationInfo.packageName,
+                            activityClassName = app.componentName.className,
+                            isNew = (System.currentTimeMillis() - app.firstInstallTime) < Constants.ONE_HOUR_IN_MILLIS,
+                            user = profile,
+                            appIcon = app.getIcon(0),
+                        )
+                    }
+            }.sortedBy { it.appLabel.lowercase() }
+
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }
 

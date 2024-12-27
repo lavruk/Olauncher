@@ -15,6 +15,14 @@ import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -47,7 +55,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import app.olauncher.databinding.FragmentHomeBinding
+import app.olauncher.ui.theme.JetLaggedTheme
 
 class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener {
 
@@ -55,29 +65,24 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     private lateinit var viewModel: MainViewModel
     private lateinit var deviceManager: DevicePolicyManager
 
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
+//    private var _binding: FragmentHomeBinding? = null
+//    private val binding get() = _binding!!
 
-    private var useCompose = false
+    private var useCompose = true
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return if (useCompose) {
-            ComposeView(requireContext()).apply {
+//        return if (useCompose) {
+            return ComposeView(requireContext()).apply {
                 setContent {
-                    val appNames = listOf<String>(
-                        // TODO - add app names
-                    )
-                    HomeView(
-                        viewModel,
-                        appNames,
-                        { index -> homeAppClicked(index + 1) },
-                        { index -> homeAppLongClicked(index + 1) })
+
+
                 }
             }
-        } else {
-            _binding = FragmentHomeBinding.inflate(inflater, container, false)
-            binding.root
-        }
+//        } else {
+//            _binding = FragmentHomeBinding.inflate(inflater, container, false)
+//            binding.root
+//        }
     }
 
     private fun homeAppLongClicked(i: Int) {
@@ -117,10 +122,10 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             R.id.tvScreenTime -> openScreenTimeDigitalWellbeing()
 
             else -> {
-                if (view is HomeAppView) {
-                    val appLocation = view.textView.tag.toString().toInt()
-                    homeAppClicked(appLocation)
-                }
+//                if (view is HomeAppView) {
+//                    val appLocation = view.textView.tag.toString().toInt()
+//                    homeAppClicked(appLocation)
+//                }
             }
         }
     }
@@ -150,11 +155,11 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     override fun onLongClick(view: View): Boolean {
-        if (view is HomeAppView) {
-            val index = view.textView.tag.toString().toInt() -1
-            showAppList(Constants.FLAG_SET_HOME_APP_1 + index, prefs.getAppName(index + 1).isNotEmpty(), true)
-            return true
-        }
+//        if (view is HomeAppView) {
+//            val index = view.textView.tag.toString().toInt() -1
+//            showAppList(Constants.FLAG_SET_HOME_APP_1 + index, prefs.getAppName(index + 1).isNotEmpty(), true)
+//            return true
+//        }
 
         when (view.id) {
             R.id.clock -> {
@@ -177,12 +182,12 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
     }
 
     private fun initObservers() {
-        if (prefs.firstSettingsOpen) {
-            binding.firstRunTips.visibility = View.VISIBLE
-            binding.setDefaultLauncher.visibility = View.GONE
-        } else {
-            binding.firstRunTips.visibility = View.GONE
-        }
+//        if (prefs.firstSettingsOpen) {
+//            binding.firstRunTips.visibility = View.VISIBLE
+//            binding.setDefaultLauncher.visibility = View.GONE
+//        } else {
+//            binding.firstRunTips.visibility = View.GONE
+//        }
 
         viewModel.refreshHome.observe(viewLifecycleOwner) {
             populateHomeScreen(it)
@@ -196,9 +201,9 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
                 prefs.homeBottomAlignment = false
                 setHomeAlignment()
             }
-            if (binding.firstRunTips.visibility == View.VISIBLE) return@Observer
-            if (it) binding.setDefaultLauncher.visibility = View.GONE
-            else binding.setDefaultLauncher.visibility = View.VISIBLE
+//            if (binding.firstRunTips.visibility == View.VISIBLE) return@Observer
+//            if (it) binding.setDefaultLauncher.visibility = View.GONE
+//            else binding.setDefaultLauncher.visibility = View.VISIBLE
         })
         viewModel.homeAppAlignment.observe(viewLifecycleOwner) {
             setHomeAlignment(it)
@@ -207,38 +212,36 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             populateDateTime()
         }
         viewModel.screenTimeValue.observe(viewLifecycleOwner) {
-            it?.let { binding.tvScreenTime.text = it }
+//            it?.let { binding.tvScreenTime.text = it }
         }
     }
 
     private fun initSwipeTouchListener() {
         val context = requireContext()
-        binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
-        homeAppViews.forEach { it.setOnTouchListener(getViewSwipeTouchListener(context, it)) }
+//        binding.mainLayout.setOnTouchListener(getSwipeGestureListener(context))
+//        homeAppViews.forEach { it.setOnTouchListener(getViewSwipeTouchListener(context, it)) }
     }
 
     private fun initClickListeners() {
-        binding.lock.setOnClickListener(this)
-        binding.clock.setOnClickListener(this)
-        binding.date.setOnClickListener(this)
-        binding.clock.setOnLongClickListener(this)
-        binding.date.setOnLongClickListener(this)
-        binding.setDefaultLauncher.setOnClickListener(this)
-        binding.tvScreenTime.setOnClickListener(this)
+//        binding.lock.setOnClickListener(this)
+//        binding.clock.setOnClickListener(this)
+//        binding.date.setOnClickListener(this)
+//        binding.clock.setOnLongClickListener(this)
+//        binding.date.setOnLongClickListener(this)
+//        binding.setDefaultLauncher.setOnClickListener(this)
+//        binding.tvScreenTime.setOnClickListener(this)
     }
-
-    private val homeAppViews = mutableListOf<HomeAppView>()
 
     private fun setHomeAlignment(horizontalGravity: Int = prefs.homeAlignment) {
         val verticalGravity = if (prefs.homeBottomAlignment) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
-        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
-        binding.dateTimeLayout.gravity = horizontalGravity
+//        binding.homeAppsLayout.gravity = horizontalGravity or verticalGravity
+//        binding.dateTimeLayout.gravity = horizontalGravity
     }
 
     private fun populateDateTime() {
-        binding.dateTimeLayout.isVisible = prefs.dateTimeVisibility != Constants.DateTime.OFF
-        binding.clock.isVisible = Constants.DateTime.isTimeVisible(prefs.dateTimeVisibility)
-        binding.date.isVisible = Constants.DateTime.isDateVisible(prefs.dateTimeVisibility)
+//        binding.dateTimeLayout.isVisible = prefs.dateTimeVisibility != Constants.DateTime.OFF
+//        binding.clock.isVisible = Constants.DateTime.isTimeVisible(prefs.dateTimeVisibility)
+//        binding.date.isVisible = Constants.DateTime.isDateVisible(prefs.dateTimeVisibility)
 
 //        var dateText = SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(Date())
         val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
@@ -250,7 +253,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             if (battery > 0)
                 dateText = getString(R.string.day_battery, dateText, battery)
         }
-        binding.date.text = dateText.replace(".,", ",")
+//        binding.date.text = dateText.replace(".,", ",")
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -258,7 +261,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         if (requireContext().appUsagePermissionGranted().not()) return
 
         viewModel.getTodaysScreenTime()
-        binding.tvScreenTime.visibility = View.VISIBLE
+//        binding.tvScreenTime.visibility = View.VISIBLE
 
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val horizontalMargin = if (isLandscape) 64.dpToPx() else 10.dpToPx()
@@ -276,8 +279,8 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             marginEnd = horizontalMargin
             gravity = if (prefs.homeAlignment == Gravity.END) Gravity.START else Gravity.END
         }
-        binding.tvScreenTime.layoutParams = params
-        binding.tvScreenTime.setPadding(10.dpToPx())
+//        binding.tvScreenTime.layoutParams = params
+//        binding.tvScreenTime.setPadding(10.dpToPx())
     }
 
     private fun populateHomeScreen(appCountUpdated: Boolean) {
@@ -290,51 +293,54 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
         val homeAppsNum = prefs.homeAppsNum
         if (homeAppsNum == 0) return
 
-        binding.homeAppsLayout.removeAllViews()
-        homeAppViews.clear()
+//        binding.homeAppsLayout.removeAllViews()
+//        homeAppViews.clear()
 
-        for (i in 0 until homeAppsNum) {
-            val homeAppView = HomeAppView(requireContext())
-            homeAppViews.add(homeAppView)
-            binding.homeAppsLayout.addView(homeAppView)
-
-            homeAppView.setOnClickListener(this)
-            homeAppView.setOnLongClickListener(this)
-            homeAppView.textView.tag = i + 1
-
-
-            val appName = prefs.getAppName(i + 1)
-            val appPackage = prefs.getAppPackage(i + 1)
-            val appUser = prefs.getAppUser(i + 1)
-
-            if (!setHomeAppText(homeAppView, appName, appPackage, appUser)) {
-                prefs.setAppName(i + 1, "")
-                prefs.setAppPackage(i + 1, "")
-            }
-        }
+//        for (i in 0 until homeAppsNum) {
+//            val homeAppView = HomeAppView(requireContext())
+//            homeAppViews.add(homeAppView)
+//            binding.homeAppsLayout.addView(homeAppView)
+//
+//            homeAppView.setOnClickListener(this)
+//            homeAppView.setOnLongClickListener(this)
+//            homeAppView.textView.tag = i + 1
+//
+//
+//            val appName = prefs.getAppName(i + 1)
+//            val appPackage = prefs.getAppPackage(i + 1)
+//            val appUser = prefs.getAppUser(i + 1)
+//
+//            if (!setHomeAppText(homeAppView, appName, appPackage, appUser)) {
+//                prefs.setAppName(i + 1, "")
+//                prefs.setAppPackage(i + 1, "")
+//            }
+//        }
     }
 
-    private fun setHomeAppText(homeAppView: HomeAppView, appName: String, packageName: String, userString: String): Boolean {
-        if (isPackageInstalled(requireContext(), packageName, userString)) {
-            homeAppView.textView.text = appName
-            return true
-        }
-        homeAppView.textView.text = ""
-        return false
-    }
+//    private fun setHomeAppText(homeAppView: HomeAppView, appName: String, packageName: String, userString: String): Boolean {
+//        if (isPackageInstalled(requireContext(), packageName, userString)) {
+//            homeAppView.textView.text = appName
+//            return true
+//        }
+//        homeAppView.textView.text = ""
+//        return false
+//    }
 
     private fun hideHomeApps() {
-        binding.homeAppsLayout.removeAllViews()
+//        binding.homeAppsLayout.removeAllViews()
     }
 
     private fun homeAppClicked(location: Int) {
-        if (prefs.getAppName(location).isEmpty()) showLongPressToast()
-        else launchApp(
-            prefs.getAppName(location),
-            prefs.getAppPackage(location),
-            prefs.getAppActivityClassName(location),
-            prefs.getAppUser(location)
-        )
+        if (prefs.getAppName(location).isEmpty()) {
+            showLongPressToast()
+        } else {
+            launchApp(
+                prefs.getAppName(location),
+                prefs.getAppPackage(location),
+                prefs.getAppActivityClassName(location),
+                prefs.getAppUser(location)
+            )
+        }
     }
 
     private fun launchApp(appName: String, packageName: String, activityClassName: String?, userString: String) {
@@ -513,7 +519,7 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
             override fun onDoubleClick() {
                 super.onDoubleClick()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    binding.lock.performClick()
+//                    binding.lock.performClick()
                 else if (prefs.lockModeOn)
                     lockPhone()
             }
@@ -561,6 +567,6 @@ class HomeFragment : Fragment(), View.OnClickListener, View.OnLongClickListener 
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+//        _binding = null
     }
 }

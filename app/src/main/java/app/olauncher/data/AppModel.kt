@@ -17,3 +17,10 @@ data class AppModel(
         else -> appLabel.compareTo(other.appLabel, true)
     }
 }
+
+data class HomeAppModel(
+    val appLabel: String,
+    val appPackage: String,
+    val activityClassName: String,
+    val user: String,
+)

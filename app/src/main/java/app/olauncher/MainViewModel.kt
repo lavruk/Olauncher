@@ -6,6 +6,7 @@ import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.os.Process
 import android.os.UserHandle
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -20,13 +21,17 @@ import androidx.work.WorkManager
 import app.olauncher.data.AppModel
 import app.olauncher.data.Constants
 import app.olauncher.data.Constants.ONE_DAY_IN_MILLIS
+import app.olauncher.data.HomeAppModel
 import app.olauncher.data.Prefs
 import app.olauncher.helper.SingleLiveEvent
 import app.olauncher.helper.WallpaperWorker
 import app.olauncher.helper.formattedTimeSpent
 import app.olauncher.helper.getAppsList
+import app.olauncher.helper.getHomeAppsList
 import app.olauncher.helper.isOlauncherDefault
 import app.olauncher.helper.showToast
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -40,7 +45,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val refreshHome = MutableLiveData<Boolean>()
     val toggleDateTime = MutableLiveData<Unit>()
     val updateSwipeApps = MutableLiveData<Any>()
-    val appList = MutableLiveData<List<AppModel>?>()
+    val appList = flow {
+        emit(getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps = true))
+    }
     val hiddenApps = MutableLiveData<List<AppModel>?>()
     val isOlauncherDefault = MutableLiveData<Boolean>()
     val launcherResetFailed = MutableLiveData<Boolean>()
@@ -50,6 +57,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showDialog = SingleLiveEvent<String>()
     val checkForMessages = SingleLiveEvent<Unit?>()
     val resetLauncherLiveData = SingleLiveEvent<Unit?>()
+
+    private val _homeApps = (1..prefs.homeAppsNum).map { location ->
+        HomeAppModel(
+            appLabel = prefs.getAppName(location),
+            appPackage = prefs.getAppPackage(location),
+            activityClassName = prefs.getAppActivityClassName(location),
+            user = prefs.getAppUser(location),
+        )
+    }
+
+    val homeApps = appList.map { list ->
+        list.filter { app ->
+        _homeApps.any { app.appPackage == it.appPackage && app.activityClassName == it.activityClassName && app.user.toString() == it.user  }
+    } }
 
     fun selectedApp(appModel: AppModel, flag: Int) {
         when (flag) {
@@ -138,7 +159,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             launcher.startMainActivity(component, userHandle, null, null)
         } catch (e: SecurityException) {
             try {
-                launcher.startMainActivity(component, android.os.Process.myUserHandle(), null, null)
+                launcher.startMainActivity(component, Process.myUserHandle(), null, null)
             } catch (e: Exception) {
                 appContext.showToast(appContext.getString(R.string.unable_to_open_app))
             }
@@ -148,9 +169,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getAppList(includeHiddenApps: Boolean = false) {
-        viewModelScope.launch {
-            appList.value = getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps)
-        }
+//        viewModelScope.launch {
+//            appList.value = getAppsList(appContext, prefs, includeRegularApps = true, includeHiddenApps)
+//        }
     }
 
     fun getHiddenApps() {

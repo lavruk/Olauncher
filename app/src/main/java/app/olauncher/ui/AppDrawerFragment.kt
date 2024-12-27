@@ -224,13 +224,13 @@ class AppDrawerFragment : Fragment() {
                 }
             }
         } else {
-            viewModel.appList.observe(viewLifecycleOwner) {
-                it?.let { appModels ->
-                    adapter.setAppList(appModels.toMutableList())
-                    updateLetterIndex(appModels)
-                    adapter.filter.filter(binding.search.query)
-                }
-            }
+//            viewModel.appList.observe(viewLifecycleOwner) {
+//                it?.let { appModels ->
+//                    adapter.setAppList(appModels.toMutableList())
+//                    updateLetterIndex(appModels)
+//                    adapter.filter.filter(binding.search.query)
+//                }
+//            }
         }
     }
 

@@ -1,4 +1,3 @@
-
 package app.olauncher.ui
 
 import android.annotation.SuppressLint
@@ -19,38 +18,58 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.asFlow
 
 @SuppressLint("UnrememberedMutableInteractionSource")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomeView(viewModel: MainViewModel, appNames: List<String> = listOf(), onClick: (Int) -> Unit = {}, onLongClick: (Int) -> Unit = {}) {
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+fun HomeView(
+    size: WindowSizeClass,
+    viewModel: MainViewModel,
+    onClick: (Int) -> Unit = {},
+    onLongClick: (Int) -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
+                val appNames by viewModel.homeApps.collectAsState(initial = emptyList())
 
-for (i in appNames.indices) {
-                Text(
-                    text = appNames[i],
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .combinedClickable(
-                            interactionSource = MutableInteractionSource(),
-                            indication = null,
-                            onClick = { onClick(i) },
-                            onLongClick = { onLongClick(i) }
-                        )
-                        .padding(8.dp),
-                    textAlign = TextAlign.Center
+                for (i in appNames.indices) {
+                    Text(
+                        text = appNames[i].appLabel,
+                        color = Color.White,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null,
+                                onClick = { onClick(i) },
+                                onLongClick = { onLongClick(i) }
+                            )
+                            .padding(8.dp),
+                        textAlign = TextAlign.Center
 
-                )
+                    )
+                }
+
             }
-
         }
     }
 }

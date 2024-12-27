@@ -65,7 +65,7 @@
         tools:visibility="visible" />
 
     <!-- Home apps-->
-    <LinearLayout
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/homeAppsLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -73,11 +73,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingTop="112dp"
-        android:paddingBottom="48dp">
-
-
-
-    </LinearLayout>
+        android:paddingBottom="48dp"/>
 
     <TextView
         android:id="@+id/firstRunTips"
