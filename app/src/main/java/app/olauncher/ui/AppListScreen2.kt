@@ -3,6 +3,7 @@ package app.olauncher.ui
 import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,14 +19,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,6 +38,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
@@ -42,6 +47,7 @@ import app.olauncher.helper.getAppsList
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 class AppListViewModel(private val application: Application) : AndroidViewModel(application) {
 
@@ -128,7 +134,7 @@ fun AppListScreen2(viewModel: AppListViewModel) {
 
         // Overlay for selected letter (optional, based on your design)
         if (selectedLetter != null) {
-            SelectedLetterOverlay(selectedLetter!!)
+            SelectedLetterOverlay(Modifier.align(Alignment.CenterEnd), selectedLetter!!, touchPoint)
         }
     }
 }
@@ -181,17 +187,19 @@ fun AlphabetListSideBar(
     val itemHeight = screenHeight / alphabetList.size
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
-    val touchPointX = remember { mutableStateOf(0f) }
-
     Column(
         modifier = modifier
             .fillMaxHeight()
             .padding(end = 8.dp) // Add padding to the right side
             .pointerInput(Unit) {
+//                detectDragGestures { change, dragAmount ->
+//                    println("@@@ detectDragGestures: ${change.position}")
+//                    change.consume()
+//                }
                 detectVerticalDragGestures(
                     onVerticalDrag = { change, _ ->
+//                        println("@@@ onVerticalDrag: ${change.position}")
                         val touchY = change.position.y
-                        touchPointX.value = change.position.x
                         val index = (touchY / with(density) { itemHeight.toPx() })
                             .coerceAtLeast(0f)
                             .coerceAtMost(alphabetList.size - 1f)
@@ -201,7 +209,6 @@ fun AlphabetListSideBar(
                     },
                     onDragStart = {
                         val touchY = it.y
-                        touchPointX.value = it.x
                         val index = (touchY / with(density) { itemHeight.toPx() })
                             .coerceAtLeast(0f)
                             .coerceAtMost(alphabetList.size - 1f)
@@ -231,16 +238,8 @@ fun AlphabetListSideBar(
                     (distanceToTouch / (screenHeight.value * 0.75f)).coerceAtMost(1f) // Normalized to half screen height
                 val easingFactor = easeInOutCubic(normalizedDistance)
                 val currentOffsetX = (touchPoint.x - maxOffsetX)  * (1f - easingFactor)
-
-                println("@@@ touch x: ${touchPoint.x}, currentOffsetX: $currentOffsetX, easingFactor: $easingFactor")
-
-
-                // Determine shift direction based on touch position relative to letter
-                if (touchPoint.y < letterY) {
-                    currentOffsetX // Shift left
-                } else {
-                    currentOffsetX // Shift left
-                }
+//                println("@@@ touch x: ${touchPoint.x}, currentOffsetX: $currentOffsetX, easingFactor: $easingFactor")
+                currentOffsetX
             } else {
                 0f // No offset when not touched
             }
@@ -274,18 +273,43 @@ private fun easeInOutCubic(x: Float): Float {
 }
 
 @Composable
-fun SelectedLetterOverlay(letter: Char) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)) // Semi-transparent background
-    ) {
-        Text(
-            text = letter.toString(),
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.Center)
-        )
+fun SelectedLetterOverlay(modifier: Modifier, letter: Char, touchPoint: Offset) {
+        val density = LocalDensity.current
+        val overlaySize = 48.dp
+        val xOffset  = with(density) { 100.dp.toPx() }
+        val overlaySizePx = with(density) { overlaySize.toPx() }
+
+        // Detect touch gestures on the entire screen
+        Box(
+            modifier = modifier
+                .fillMaxHeight()
+        ) {
+            // Calculate offset based on touchPoint
+            val offsetX = touchPoint.x - xOffset- overlaySizePx / 2
+            val offsetY = touchPoint.y - overlaySizePx / 2
+
+            // Only show the overlay if a touch is detected
+            if (touchPoint != Offset.Zero) {
+                Box(
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                offsetX.roundToInt(),
+                                offsetY.roundToInt()
+                            )
+                        }
+                        .clip(CircleShape)
+                        .size(overlaySize)
+                        .background(Color.Blue)
+                ) {
+                    Text(
+                        text = letter.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        }
     }
-}
