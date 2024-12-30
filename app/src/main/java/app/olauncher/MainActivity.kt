@@ -9,7 +9,6 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,11 +18,8 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import app.olauncher.data.Constants
 import app.olauncher.data.Prefs
-import app.olauncher.databinding.ActivityMainBinding
 import app.olauncher.helper.hasBeenDays
 import app.olauncher.helper.hasBeenHours
 import app.olauncher.helper.isDarkThemeOn
@@ -38,9 +34,7 @@ import app.olauncher.helper.setPlainWallpaper
 import app.olauncher.helper.shareApp
 import app.olauncher.helper.showLauncherSelector
 import app.olauncher.helper.showToast
-import app.olauncher.ui.AppListScreen1
-import app.olauncher.ui.AppListScreen2
-import app.olauncher.ui.HomeView
+import app.olauncher.ui.AppListScreen
 import app.olauncher.ui.theme.JetLaggedTheme
 import java.util.Calendar
 
@@ -77,7 +71,7 @@ class MainActivity : AppCompatActivity() {
             val windowSizeClass = calculateWindowSizeClass(this)
             JetLaggedTheme {
 //                HomeView(windowSizeClass, viewModel, {}, {})
-                AppListScreen2(ViewModelProvider(this).get())
+                AppListScreen(ViewModelProvider(this).get())
             }
         }
 
