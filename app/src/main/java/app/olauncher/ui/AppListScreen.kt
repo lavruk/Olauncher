@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,8 +39,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
@@ -114,7 +115,13 @@ fun AppListScreen(viewModel: AppListViewModel) {
     val touchPoint by viewModel.touchPoint
     val isAlphabetListTouched by viewModel.isAlphabetListTouched
 
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    val density = LocalDensity.current
+    val screenHeight = with(density) {LocalConfiguration.current.screenHeightDp.dp.toPx()}
+    val alphabetTextSize = 20.sp
+    val alphabetTextPadding = 6.dp
+    val alphabetItemHeight = with(density){ 2 * alphabetTextPadding.toPx() + alphabetTextSize.toPx() }.roundToInt()
+    val alphabetContainerOffsetTop = screenHeight * 0.45f
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -123,12 +130,13 @@ fun AppListScreen(viewModel: AppListViewModel) {
 
         // Alphabet List (Side Bar)
         AlphabetListSideBar(
-            modifier = Modifier.align(Alignment.CenterEnd),
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = with(density){alphabetContainerOffsetTop.toDp()}),
             alphabetList,
             selectedLetter,
             touchPoint,
             isAlphabetListTouched,
-            screenHeight,
+            alphabetTextSize,
+            alphabetItemHeight,
             onLetterTouched = { letter, y ->
                 viewModel.onLetterTouched(letter, y)
             },
@@ -137,7 +145,10 @@ fun AppListScreen(viewModel: AppListViewModel) {
 
         // Overlay for selected letter (optional, based on your design)
         if (selectedLetter != null) {
-            SelectedLetterOverlay(Modifier.align(Alignment.CenterEnd), selectedLetter!!, touchPoint)
+            SelectedLetterOverlay(
+                Modifier.align(Alignment.CenterEnd),
+                selectedLetter!!,
+                touchPoint, alphabetContainerOffsetTop)
         }
     }
 }
@@ -216,29 +227,23 @@ fun AlphabetListSideBar(
     selectedLetter: Char?,
     touchPoint: Offset,
     isAlphabetListTouched: Boolean,
-    screenHeight: Dp,
+    textSize: TextUnit,
+    itemHeight: Int,
     onLetterTouched: (Char, Offset) -> Unit,
     onAlphabetListTouchEnded: () -> Unit
 ) {
     val density = LocalDensity.current
-    val textStyle = androidx.compose.ui.text.TextStyle(fontSize = 18.sp, color = Color.White)
-    val itemHeight = screenHeight / alphabetList.size
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val textStyle = androidx.compose.ui.text.TextStyle(fontSize = textSize, color = Color.White)
 
     Column(
         modifier = modifier
-            .fillMaxHeight()
-            .padding(end = 8.dp) // Add padding to the right side
+            .wrapContentHeight()
+            .padding(end = 8.dp)
             .pointerInput(Unit) {
-//                detectDragGestures { change, dragAmount ->
-//                    println("@@@ detectDragGestures: ${change.position}")
-//                    change.consume()
-//                }
                 detectVerticalDragGestures(
                     onVerticalDrag = { change, _ ->
-//                        println("@@@ onVerticalDrag: ${change.position}")
                         val touchY = change.position.y
-                        val index = (touchY / with(density) { itemHeight.toPx() })
+                        val index = (touchY /  itemHeight)
                             .coerceAtLeast(0f)
                             .coerceAtMost(alphabetList.size - 1f)
                             .toInt()
@@ -247,7 +252,7 @@ fun AlphabetListSideBar(
                     },
                     onDragStart = {
                         val touchY = it.y
-                        val index = (touchY / with(density) { itemHeight.toPx() })
+                        val index = (touchY / itemHeight)
                             .coerceAtLeast(0f)
                             .coerceAtMost(alphabetList.size - 1f)
                             .toInt()
@@ -267,16 +272,16 @@ fun AlphabetListSideBar(
 
             // Calculate the horizontal offset for centering
             val offsetX = if (isAlphabetListTouched) {
-                val letterY = with(density) { (index * itemHeight.toPx() + itemHeight.toPx() / 2f) }
+                val letterY =  (index * itemHeight + itemHeight / 2f)
                 val distanceToTouch = abs(touchPoint.y - letterY)
 
                 // Max shift distance and easing
                 val maxOffsetX = with(density) { 80.dp.toPx() } // Reduced for less extreme shifting
+                val listHeight = alphabetList.size * itemHeight
                 val normalizedDistance =
-                    (distanceToTouch / (screenHeight.value * 0.75f)).coerceAtMost(1f) // Normalized to half screen height
+                    (distanceToTouch / (listHeight * 0.5f)).coerceAtMost(1f)
                 val easingFactor = easeInOutCubic(normalizedDistance)
                 val currentOffsetX = (touchPoint.x - maxOffsetX)  * (1f - easingFactor)
-//                println("@@@ touch x: ${touchPoint.x}, currentOffsetX: $currentOffsetX, easingFactor: $easingFactor")
                 currentOffsetX
             } else {
                 0f // No offset when not touched
@@ -285,7 +290,7 @@ fun AlphabetListSideBar(
             Text(
                 text = letter.toString(),
                 modifier = Modifier
-                    .height(itemHeight)
+                    .height(with(density) { itemHeight.toDp()})
                     .offset(x = with(density) { offsetX.toDp() })
                     .graphicsLayer {
                         alpha = if (isAlphabetListTouched) {
@@ -311,7 +316,7 @@ private fun easeInOutCubic(x: Float): Float {
 }
 
 @Composable
-fun SelectedLetterOverlay(modifier: Modifier, letter: Char, touchPoint: Offset) {
+fun SelectedLetterOverlay(modifier: Modifier, letter: Char, touchPoint: Offset, topOffset: Float) {
         val density = LocalDensity.current
         val overlaySize = 48.dp
         val xOffset  = with(density) { 100.dp.toPx() }
@@ -324,7 +329,7 @@ fun SelectedLetterOverlay(modifier: Modifier, letter: Char, touchPoint: Offset) 
         ) {
             // Calculate offset based on touchPoint
             val offsetX = touchPoint.x - xOffset- overlaySizePx / 2
-            val offsetY = touchPoint.y - overlaySizePx / 2
+            val offsetY = topOffset + touchPoint.y - overlaySizePx / 2
 
             // Only show the overlay if a touch is detected
             if (touchPoint != Offset.Zero) {
